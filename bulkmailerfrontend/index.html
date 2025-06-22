@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Email Sender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        
+        input[type="email"], input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        input[type="email"]:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .recipients-input {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        
+        .recipient-count {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .result.error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        .result h3 {
+            margin-bottom: 10px;
+        }
+        
+        .result-details {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .help-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Bulk Email Sender</h1>
+            <p>Send emails to multiple recipients efficiently</p>
+        </div>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="sender">Sender Email</label>
+                <input type="email" id="sender" name="sender" required placeholder="youremail@gmail.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required placeholder="Enter email subject">
+            </div>
+            
+            <div class="form-group">
+                <label for="body">Email Body (HTML supported)</label>
+                <textarea id="body" name="body" required placeholder="<p>Your email content here...</p>"></textarea>
+                <div class="help-text">You can use HTML tags for formatting</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="recipients">Recipients</label>
+                <textarea id="recipients" name="recipients" class="recipients-input" required 
+                          placeholder="dolapoakamo01@gmail.com,
+dolapoakamo1@gmail.com,
+another@email.com"></textarea>
+                <div class="help-text">Paste emails separated by commas or new lines</div>
+                <div class="recipient-count" id="recipientCount">0 recipients</div>
+            </div>
+            
+            <button type="submit" class="btn" id="sendBtn">
+                Send Bulk Email
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your bulk email request...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <h3 id="resultTitle"></h3>
+            <div class="result-details" id="resultDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://bulkmailer-388d.onrender.com/api/send-bulk-email';
+        
+        // Update recipient count as user types
+        document.getElementById('recipients').addEventListener('input', function() {
+            const text = this.value.trim();
+            if (!text) {
+                document.getElementById('recipientCount').textContent = '0 recipients';
+                return;
+            }
+            
+            // Split by comma and/or newline, then filter out empty strings
+            const emails = text.split(/[,\n]/)
+                              .map(email => email.trim())
+                              .filter(email => email.length > 0);
+            
+            const count = emails.length;
+            document.getElementById('recipientCount').textContent = `${count} recipient${count !== 1 ? 's' : ''}`;
+        });
+        
+        // Handle form submission
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const sender = formData.get('sender');
+            const subject = formData.get('subject');
+            const body = formData.get('body');
+            const recipientsText = formData.get('recipients').trim();
+            
+            // Parse recipients
+            const receivers = recipientsText.split(/[,\n]/)
+                                           .map(email => email.trim())
+                                           .filter(email => email.length > 0);
+            
+            if (receivers.length === 0) {
+                showResult('error', 'Error', 'Please enter at least one recipient email address.');
+                return;
+            }
+            
+            // Validate email addresses
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const invalidEmails = receivers.filter(email => !emailRegex.test(email));
+            
+            if (invalidEmails.length > 0) {
+                showResult('error', 'Invalid Email Addresses', 
+                          `The following email addresses are invalid: ${invalidEmails.join(', ')}`);
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: sender,
+                        subject: subject,
+                        body: body,
+                        receivers: receivers
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('success', 'Email Sent Successfully!', 
+                              `Request ID: ${data.requestId}<br>
+                               Total Recipients: ${data.totalRecipients}<br>
+                               Status URL: ${data.statusUrl || 'Not provided'}`);
+                    
+                    // Reset form
+                    document.getElementById('emailForm').reset();
+                    document.getElementById('recipientCount').textContent = '0 recipients';
+                } else {
+                    showResult('error', 'Error', data.message || 'Failed to send email');
+                }
+            } catch (error) {
+                showResult('error', 'Network Error', 
+                          'Failed to connect to the server. Please check your connection and try again.');
+            } finally {
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function showResult(type, title, details) {
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultDetails = document.getElementById('resultDetails');
+            
+            resultDiv.className = `result ${type}`;
+            resultTitle.textContent = title;
+            resultDetails.innerHTML = details;
+            resultDiv.style.display = 'block';
+            
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
