@@ -17,6 +17,8 @@ this.transporter = nodemailer.createTransport({
 
     this.batchSize = parseInt(process.env.EMAIL_BATCH_SIZE) || 10;
     this.batchDelay = parseInt(process.env.BATCH_DELAY_MS) || 1000;
+
+    this.sender = `"${process.env.FROM_NAME}" <${process.env.EMAIL_USER}>`
   }
 
   async verifyConnection() {

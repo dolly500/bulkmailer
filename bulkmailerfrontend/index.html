@@ -199,11 +199,6 @@
         
         <form id="emailForm">
             <div class="form-group">
-                <label for="sender">Sender Email</label>
-                <input type="email" id="sender" name="sender" required placeholder="youremail@gmail.com">
-            </div>
-            
-            <div class="form-group">
                 <label for="subject">Subject</label>
                 <input type="text" id="subject" name="subject" required placeholder="Enter email subject">
             </div>
@@ -217,9 +212,7 @@
             <div class="form-group">
                 <label for="recipients">Recipients</label>
                 <textarea id="recipients" name="recipients" class="recipients-input" required 
-                          placeholder="dolapoakamo01@gmail.com,
-dolapoakamo1@gmail.com,
-another@email.com"></textarea>
+                          placeholder="Input your email"></textarea>
                 <div class="help-text">Paste emails separated by commas or new lines</div>
                 <div class="recipient-count" id="recipientCount">0 recipients</div>
             </div>
@@ -302,7 +295,6 @@ another@email.com"></textarea>
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        sender: sender,
                         subject: subject,
                         body: body,
                         receivers: receivers

@@ -5,6 +5,9 @@ const { v4: uuidv4 } = require('uuid');
 // In-memory storage for email status (use database in production)
 const emailStatusStore = new Map();
 
+//force sender from environment
+const DEFAULT_SENDER = `"${process.env.FROM_NAME}" <${process.env.EMAIL_USER}>`
+
 const sendBulkEmail = async (req, res) => {
   try {
     const { sender, subject, body, receivers } = req.body;
@@ -55,7 +58,7 @@ const sendSingleEmail = async (req, res) => {
     }
 
     const result = await emailService.sendEmail({
-      from: sender,
+      from: DEFAULT_SENDER,
       to: receiver,
       subject: subject,
       html: body,
@@ -102,7 +105,7 @@ async function processEmailsAsync(requestId, emailData) {
   
   try {
     const results = await emailService.sendBulkEmails({
-      sender,
+      sender: DEFAULT_SENDER,
       subject,
       body,
       receivers,
